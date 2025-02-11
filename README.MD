@@ -29,7 +29,7 @@ An in-game interface/tool to scan every remote for backdoors. </br>
 ```lua
 local Backdoor = Instance.new("RemoteEvent", game:GetService("ReplicatedStorage")
 Backdoor.Name = "Backdoor"
-Backdoor.OnServerEvent:connect(function(Player, Code)
+Backdoor.OnServerEvent:Connect(function(Player, Code)
     loadstring(Code)()
 end)
 ```
