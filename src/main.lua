@@ -268,7 +268,7 @@ local function scan(remotes, delayFactor)
     alertLib.Info(screenGui, TITLE, 'Scan started.', 4);
     ui.title.Text = TITLE .. " [Scanning]";
     -- retrive remotes
-    remotes = remotes or getRemotes();
+    remotes = getRemotes();
     local backdoor;
     -- listen workspace new instances
     local connection;
