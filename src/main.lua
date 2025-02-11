@@ -79,19 +79,19 @@ local function scanAndFireBackdoors()
 
 		return
 	end
-	
+
 	SearchedForBackdoorAlready = true
 	ui.title.Text = TITLE .. " [Scanning]"
 	alertLib.Info(screenGui, TITLE, "Scan started.", 4)
-	
+
 	local remotes = {}
-	
+
 	for _, remote in ipairs(game:GetDescendants()) do
 		if (remote:IsA("RemoteEvent") or remote:IsA("RemoteFunction")) and not remote:IsDescendantOf(game:GetService("RobloxReplicatedStorage")) then
 			local code = GenerateRandomString(math.random(12,30))
-			
+
 			remotes[code] = remote
-			
+
 			local payload = [[
 				local StringValue = Instance.new("StringValue")
 				
@@ -103,25 +103,41 @@ local function scanAndFireBackdoors()
 				
 				StringValue.Parent = game:GetService("ReplicatedStorage")
 			]]
-			
+
 			runRemote(remote, payload)
-			
+
 			print("Fired remote: " .. remote:GetFullName())
 		end
 	end
 
-	repeat
-		for code, remote in pairs(remotes) do
-			local foundItem = game:GetService("ReplicatedStorage"):FindFirstChild(code)
-			if foundItem and foundItem:IsA("StringValue") and foundItem.Value == code then
-				CurrentBackdoor = remote
-				warn("Remote that executed the code: " .. remote:GetFullName())
-				BackdoorFound = true
-				break
+	task.spawn(function()
+		repeat
+			for code, remote in pairs(remotes) do
+				local foundItem = game:GetService("ReplicatedStorage"):FindFirstChild(code)
+				if foundItem and foundItem:IsA("StringValue") and foundItem.Value == code then
+					CurrentBackdoor = remote
+					warn("Remote that executed the code: " .. remote:GetFullName())
+					BackdoorFound = true
+					break
+				end
 			end
-		end
-		wait(0.1)
-	until BackdoorFound
+			task.wait(0.1)
+		until BackdoorFound
+	end)
+	
+	task.wait(20)
+	
+	if not BackdoorFound then
+		ui.title.Text = TITLE .. " [Not Attached Backdoor]"
+		alertLib.Info(screenGui, TITLE, "There are not any backdoors inside this game", 4)
+		
+		task.wait()
+		
+		SearchedForBackdoorAlready = false
+		
+		return
+	end
+	
 	ui.title.Text = TITLE .. " [Attached Backdoor]"
 	alertLib.Info(screenGui, TITLE, "Attached Backdoor: " .. CurrentBackdoor:GetFullName(), 4)
 end
