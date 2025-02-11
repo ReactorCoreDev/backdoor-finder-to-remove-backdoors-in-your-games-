@@ -2793,7 +2793,6 @@ local function addScripts(list, isLocal)
 end
 
 addScripts(verifiedScripts);
-addScripts(configs.data.scripts, true)
 
 return {
 	addScripts = addScripts,
