@@ -469,4 +469,4 @@ ui.title.Text = TITLE;
 
 alertLib.Success(screenGui, TITLE, 'Backdoor scanner successfully loaded.');
 alertLib.Info(screenGui, TITLE, 'Home to toggle ui.', 4);
-alertLib.Info(screenGui, TITLE, 'Rrecontinued by ReactorCoreDev!!', 4);
+alertLib.Info(screenGui, TITLE, 'Recontinued by ReactorCoreDev!!', 4);
