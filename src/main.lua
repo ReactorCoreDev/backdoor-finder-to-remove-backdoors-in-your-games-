@@ -178,7 +178,7 @@ local function runRemote(r, args)
             end);
         end);
     end;
-end;
+end
 
 -- generate an unique random string name inside the passed parent
 local function urString(len, parent)
@@ -288,17 +288,16 @@ local function getRemotes()
 end;
 
 local function CheckBackdoor(Remote, BackdoorCode)
-        if game:GetService("ReplicatedStorage"):FindFirstChild(BackdoorCode) then
-            if game:GetService("ReplicatedStorage"):FindFirstChild(BackdoorCode):IsA("IntValue") then
-                if game:GetService("ReplicatedStorage"):FindFirstChild(BackdoorCode).Value == BackdoorCode then
-                    return Remote;
-                end;
+    if game:GetService("ReplicatedStorage"):FindFirstChild(BackdoorCode) then
+        if game:GetService("ReplicatedStorage"):FindFirstChild(BackdoorCode):IsA("IntValue") then
+            if game:GetService("ReplicatedStorage"):FindFirstChild(BackdoorCode).Value == BackdoorCode then
+                return Remote;
             end;
         end;
-
-        return false
     end;
-end;
+    
+    return false;
+end
 
 -- scan all game remotes and return all backdoors found
 local function scan(remotes, delayFactor)
