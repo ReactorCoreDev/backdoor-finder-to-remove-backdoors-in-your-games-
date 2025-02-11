@@ -1,6 +1,6 @@
 --[========================================================================[
     backdoor.exe, the best backdoor scanner in Roblox.
-    Copyright (C) 2021	iK4oS
+    Copyright (C) 2025 ReactorCoreDev
 
     This program is free software: you can redistribute it and/or modify
     it under the terms of the GNU General Public License as published by
@@ -160,24 +160,24 @@ local function encodeBackdoors(backdoors)
 end;
 
 -- fire RemoteEvent/RemoteFunction with the given arguments in a new thread
-local function runRemote(r, ...)
+local function runRemote(r, args)
     if r:IsA("RemoteEvent") then
         pcall(function()
             task.spawn(function()
                 spawn(function()
-                    r:FireServer(...);
-                end)
-            end)
-        end)
+                    r:FireServer(args);
+                end);
+            end);
+        end);
     elseif r:IsA("RemoteFunction") then
         pcall(function()
             task.spawn(function()
                 spawn(function()
-                    r:InvokeServer(...);
-                end)
-            end)
-        end)
-    end
+                    r:InvokeServer(args);
+                end);
+            end);
+        end);
+    end;
 end;
 
 -- generate an unique random string name inside the passed parent
@@ -290,13 +290,11 @@ end;
 local function CheckBackdoor(Remote, BackdoorCode)
         if game:GetService("ReplicatedStorage"):FindFirstChild(BackdoorCode) then
             if game:GetService("ReplicatedStorage"):FindFirstChild(BackdoorCode):IsA("IntValue") then
-                if game:GetService("ReplicatedStorage"):FindFirstChild(BackdoorCode).Value = BackdoorCode then
+                if game:GetService("ReplicatedStorage"):FindFirstChild(BackdoorCode).Value == BackdoorCode then
                     return Remote;
                 end;
             end;
         end;
-        
-        task.wait();
 
         return false
     end;
