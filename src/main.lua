@@ -161,9 +161,9 @@ end;
 -- fire RemoteEvent/RemoteFunction with the given arguments in a new thread
 local function runRemote(r, ...)
     if r:IsA("RemoteEvent") then
-        task.spawn(r.FireServer, r, ...);
+        r:FireServer(...);
     elseif r:IsA("RemoteFunction") then
-        task.spawn(r.InvokeServer, r, ...);
+        r:InvokeServer(...);
     end
 end;
 
