@@ -129,7 +129,7 @@ local function scanAndFireBackdoors()
 	
 	if not BackdoorFound then
 		ui.title.Text = TITLE .. " [Not Attached Backdoor]"
-		alertLib.Info(screenGui, TITLE, "There are not any backdoors inside this game", 4)
+		alertLib.Info(screenGui, TITLE, "No backdoors found", 4)
 		
 		task.wait()
 		
