@@ -39,6 +39,7 @@ local ALPHABET = {'a','b','c','d','e','f','g','h','i','j','k','l','m','n','o','p
 
 local BackdoorFound = false
 local SearchedForBackdoorAlready = false
+local Time = 20
 
 local function GenerateRandomString(length)
 	local str = ""
@@ -123,9 +124,14 @@ local function scanAndFireBackdoors()
 			end
 			task.wait(0.1)
 		until BackdoorFound
+        if BackdoorFound or CurrentBackdoor then
+            Time = 0
+        end
 	end)
+
+    task.wait(0.5)
 	
-	task.wait(20)
+	task.wait(Time)
 	
 	if not BackdoorFound then
 		ui.title.Text = TITLE .. " [Not Attached Backdoor]"
