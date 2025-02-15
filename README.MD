@@ -1,9 +1,3 @@
-<h2 align="center"> 
-  <a href="https://github.com/iK4oS/backdoor.exe">
-    <img src="logo_outlined.png" width="700" alt="logo">
-  </a>
-</h2>
-
 <p align="center"> 
   <img alt="Version" src="https://img.shields.io/badge/version-8.0.0-blue.svg?cacheSeconds=2592000" />
   <a href="https://github.com/iK4oS/backdoor.exe/graphs/commit-activity" target="_blank">
@@ -13,7 +7,7 @@
     <img alt="License: GPL--3.0" src="https://img.shields.io/github/license/iK4oS/backdoor.exe" />
   </a>
   <div align="center">
-  <h1>Thank you for using</h1>
+  <h1>Backdoor Finder To Remove Backdoors In Your Game</h1>
 </div>
 </p>
 
