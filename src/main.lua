@@ -33,7 +33,7 @@ genv.backdoorexe = {screenGui = screenGui, ui = ui}
 
 local players = game:GetService("Players")
 local localPlayer = players.LocalPlayer
-local TITLE = "backdoor.exe - v8.0.0"
+local TITLE = "backdoor finder - v8.0.0"
 
 local ALPHABET = {'a','b','c','d','e','f','g','h','i','j','k','l','m','n','o','p','q','r','s','t','u','v','w','x','y','z','A','B','C','D','E','F','G','H','I','J','K','L','M','N','O','P','Q','R','S','T','U','V','W','X','Y','Z','0','1','2','3','4','5','6','7','8','9','!','@','#','$','%','^','&','*','(',')','-','_','=','+','[',']','{','}','|',';',':',',','.','?','/','`','~'}
 
@@ -57,6 +57,7 @@ local function runRemote(r, args)
 	end
 end
 
+
 local function applyMacros(code)
 	return 
 		code:gsub(
@@ -74,9 +75,9 @@ local code = nil
 
 local function scanAndFireBackdoors()
 	if SearchedForBackdoorAlready then
-		local code = applyMacros(editor.getCode());
+		-- local code = applyMacros(editor.getCode());
 
-		runRemote(CurrentBackdoor, code)
+		-- runRemote(CurrentBackdoor, code)
 
 		return
 	end
@@ -146,6 +147,8 @@ local function scanAndFireBackdoors()
 	
 	ui.title.Text = TITLE .. " [Attached Backdoor]"
 	alertLib.Info(screenGui, TITLE, "Attached Backdoor: " .. CurrentBackdoor:GetFullName(), 4)
+
+	alertLib.Info(screenGui, TITLE, "Path of remote is in console to remove", 4)
 end
 
 local executing = false
