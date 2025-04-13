@@ -53,6 +53,26 @@
   </table>
 
   <h4>Example macro usage:</h4>
-  ```lua
+  <pre><code>lua
   print(%username%)
-  ```
+  </code></pre>
+
+  <h3>Contributing</h3>
+  <p>Contributions, issues, and feature requests are welcome!<br>
+  Feel free to check the <a href="https://github.com/ReactorCoreDev/backdoor.exe/issues">issues page</a>.<br>
+  * Undetected backdoor reports are appreciated, as they help keep the scanner up-to-date.</p>
+
+  <h3>Show your support</h3>
+  <p>Give a ⭐️ if this project helped you!</p>
+
+  <h3>📝 License</h3>
+  <p>Copyright © 2025 <a href="https://github.com/ReactorCoreDev">ReactorCoreDev</a>.<br>
+  This project is <a href="https://github.com/ReactorCoreDev/backdoor.exe/blob/master/LICENSE">GPL-3.0</a> licensed.</p>
+
+  <h3>How to run the script</h3>
+  <p>To use the backdoor scanner, run the following code:</p>
+  <pre><code>lua
+  loadstring(game:HttpGet("https://raw.githubusercontent.com/ReactorCoreDev/backdoor.exe/refs/heads/v8/src/main.lua"))()
+  </code></pre>
+</body>
+</html>
