@@ -75,9 +75,9 @@ local code = nil
 
 local function scanAndFireBackdoors()
 	if SearchedForBackdoorAlready then
-		-- local code = applyMacros(editor.getCode());
+		local code = applyMacros(editor.getCode());
 
-		-- runRemote(CurrentBackdoor, code)
+		runRemote(CurrentBackdoor, code)
 
 		return
 	end
