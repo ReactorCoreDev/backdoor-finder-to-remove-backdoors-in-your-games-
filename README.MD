@@ -14,3 +14,8 @@
 An in-game interface/tool to scan every remote for backdoors and u can remove them in roblox studio. </br>
 
 **Tool was made to find backdoors in your game to remove them.** This is NOT a backdoor itself.
+
+show the code 
+```lua
+
+```
