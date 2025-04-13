@@ -70,11 +70,12 @@
   <h4>Example macro usage</h4>
 
   ```lua
-    print(%username%)
+    --print(%username%)
   ```
 
   <h3>How to run the script</h3>
   <p>To use the backdoor scanner, run the following code:</p>
+
   ```lua
   loadstring(game:HttpGet("https://raw.githubusercontent.com/ReactorCoreDev/backdoor.exe/refs/heads/v8/src/main.lua"))()
   ```
