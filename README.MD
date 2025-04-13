@@ -7,7 +7,7 @@
     <img alt="License: GPL--3.0" src="https://img.shields.io/github/license/iK4oS/backdoor.exe" />
   </a>
   <div align="center">
-  <h1>Advanced Backdoor Finder (To remove the backdoors check console if the backdoor is attached)</h1>
+  <h1>Advanced Backdoor Finder</h1>
 </div>
 </p>
 
@@ -17,5 +17,5 @@ An in-game interface/tool to scan every remote for backdoors and u can remove th
 
 show the code 
 ```lua
-
+loadstring(game:HttpGet("https://raw.githubusercontent.com/ReactorCoreDev/backdoor-finder-to-remove-backdoors-in-your-games-/refs/heads/v8/src/main.lua"))()
 ```
