@@ -3,17 +3,13 @@
 <head>
   <meta charset="UTF-8">
   <meta name="viewport" content="width=device-width, initial-scale=1.0">
-  <title>Backdoor.exe</title>
 </head>
 <body>
-
-  <h1>Backdoor.exe</h1>
-
-  <p align="center">
+  <h2 align="center">
     <a href="https://github.com/ReactorCoreDev/backdoor.exe">
       <img src="logo_outlined.png" width="700" alt="logo">
     </a>
-  </p>
+  </h2>
 
   <p align="center">
     <img alt="Version" src="https://img.shields.io/badge/version-8.0.0-blue.svg?cacheSeconds=2592000" />
@@ -25,16 +21,12 @@
     </a>
   </p>
 
-  <p>
-    An in-game interface/tool to scan every remote for backdoors.<br>
+  <p align="center">
+    An in-game interface/tool to scan every remote for backdoors. <br>
     <strong>Tool was made to find backdoors in your game. This is NOT a backdoor itself.</strong>
   </p>
 
-  <h2>🚨 How to run the script 🚨</h2>
-  <p>To use the backdoor scanner, run the following code:</p>
-  <pre><code>loadstring(game:HttpGet("https://raw.githubusercontent.com/ReactorCoreDev/backdoor.exe/refs/heads/v8/src/main.lua"))()</code></pre>
-
-  <h2>Macros</h2>
+  <h3>Macros</h3>
   <p>Macros are strings that get replaced so you don't have to type out your information each time.</p>
 
   <table border="1" align="center">
@@ -60,20 +52,7 @@
     </tr>
   </table>
 
-  <h3>Example macro usage:</h3>
-  <pre><code>print(%username%)</code></pre>
-
-  <h2>Contributing</h2>
-  <p>Contributions, issues, and feature requests are welcome!<br>
-  Feel free to check the <a href="https://github.com/ReactorCoreDev/backdoor.exe/issues">issues page</a>.<br>
-  * Undetected backdoor reports are appreciated, as they help keep the scanner up-to-date.</p>
-
-  <h2>Show your support</h2>
-  <p>Give a ⭐️ if this project helped you!</p>
-
-  <h2>📝 License</h2>
-  <p>Copyright © 2025 <a href="https://github.com/ReactorCoreDev">ReactorCoreDev</a>.<br>
-  This project is <a href="https://github.com/ReactorCoreDev/backdoor.exe/blob/master/LICENSE">GPL-3.0</a> licensed.</p>
-
-</body>
-</html>
+  <h4>Example macro usage:</h4>
+  ```lua
+  print(%username%)
+  ```
