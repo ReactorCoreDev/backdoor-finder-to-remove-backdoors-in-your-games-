@@ -4,6 +4,7 @@
         "gethiddenproperty",
         "getrenv",
         "getrenv",
-        "getgenv"
+        "getgenv",
+        "setfflag",
     ]
 }
