@@ -70,7 +70,7 @@
   <h4>Example macro usage</h4>
 
   ```lua
-    --print(%username%)
+--print(%username%)
   ```
 
   <h3>How to run the script</h3>
