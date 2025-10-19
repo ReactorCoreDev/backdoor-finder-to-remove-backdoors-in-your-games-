@@ -2703,7 +2703,7 @@ Closure = function()
 -- uis
 local executor = script.Parent.Main.BodyClipping.Executor;
 local execBtns = executor.InnerBody.BottomButtons;
-local attachBtns = executor.Main.Sidebar.Bottom;
+local attachBtns = G2L["1"].Main.Sidebar.Bottom;
 
 return {
 	-- modules
@@ -2795,6 +2795,7 @@ local function addScripts(list, isLocal)
 end
 
 addScripts(verifiedScripts);
+addScripts(configs.data.scripts, true)
 
 return {
 	addScripts = addScripts,
