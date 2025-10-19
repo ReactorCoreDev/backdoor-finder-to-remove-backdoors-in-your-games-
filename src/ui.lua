@@ -2717,7 +2717,7 @@ return {
 	-- ui
 	title = script.Parent.Main.Topbar.VersionTitle,
 	btns = {
-		execBtn = execBtns.ExecuteBtn.Hitbox
+		execBtn = execBtns.ExecuteBtn.Hitbox,
 		attachBtn = attachBtns.InviteBtn.Hitbox
 	}
 }
