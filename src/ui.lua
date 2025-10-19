@@ -2703,6 +2703,7 @@ Closure = function()
 -- uis
 local executor = script.Parent.Main.BodyClipping.Executor;
 local execBtns = executor.InnerBody.BottomButtons;
+local attachBtns = executor.Main.Sidebar.Bottom;
 
 return {
 	-- modules
@@ -2717,6 +2718,7 @@ return {
 	title = script.Parent.Main.Topbar.VersionTitle,
 	btns = {
 		execBtn = execBtns.ExecuteBtn.Hitbox
+		attachBtn = attachBtns.InviteBtn.Hitbox
 	}
 }
 end;
