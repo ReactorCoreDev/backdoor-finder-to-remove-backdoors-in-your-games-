@@ -283,10 +283,15 @@ local function getRemotes()
     return remotes;
 end;
 
+local isFirst = false
+
 -- scan all game remotes and return all backdoors found
 local function scan(remotes, delayFactor)
     delayFactor = delayFactor or 1;
-    alertLib.Info(screenGui, TITLE, 'Scan started.', 4);
+    if not isFirst then
+		isFirst = true
+		alertLib.Info(screenGui, TITLE, 'Scan started.', 4);
+	end
     ui.title.Text = TITLE .. " [Scanning]";
     -- retrive remotes
     remotes = remotes or getRemotes();
